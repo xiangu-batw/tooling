@@ -110,12 +110,15 @@ def validate_arguments(args: argparse.Namespace) -> None:
         raise ValueError(f"Index file does not exist: {args.index_file}")
 
 
-def build_sphinx_arguments(args: argparse.Namespace) -> List[str]:
+def build_sphinx_arguments(
+    args: argparse.Namespace, extra_args: List[str] = None
+) -> List[str]:
     """
     Build the argument list for Sphinx.
 
     Args:
         args: Parsed command-line arguments
+        extra_args: Additional arguments to forward to Sphinx (e.g., -D options from extra_opts)
 
     Returns:
         List of arguments to pass to Sphinx
@@ -153,6 +156,10 @@ def build_sphinx_arguments(args: argparse.Namespace) -> List[str]:
             base_arguments.append(f"-A=doc_path='{source_directory}'")
 
     base_arguments.extend(["-b", args.builder])
+
+    # Forward extra options (e.g., -D flags) to Sphinx
+    if extra_args:
+        base_arguments.extend(extra_args)
 
     return base_arguments
 
@@ -240,7 +247,7 @@ def parse_arguments() -> argparse.Namespace:
         help=f"Port to use for live preview (default: {DEFAULT_PORT}). Use 0 for auto-detection.",
     )
 
-    return parser.parse_args()
+    return parser.parse_known_args()
 
 
 def main() -> int:
@@ -251,14 +258,17 @@ def main() -> int:
         Exit code (0 for success, non-zero for failure)
     """
     try:
-        args = parse_arguments()
+        args, extra_args = parse_arguments()
         validate_arguments(args)
+        logger.info(f"[DEBUG] extra_args from parse_known_args: {extra_args}")
+        logger.info(f"[DEBUG] sys.argv was: {sys.argv}")
         # Create processor instance
         stdout_processor = StdoutProcessor()
         stderr_processor = StderrProcessor()
         # Redirect stdout and stderr
         with redirect_stderr(stderr_processor), redirect_stdout(stdout_processor):
-            sphinx_args = build_sphinx_arguments(args)
+            sphinx_args = build_sphinx_arguments(args, extra_args)
+            logger.info(f"[DEBUG] Final sphinx_args: {sphinx_args}")
             exit_code = run_sphinx_build(sphinx_args, args.builder)
         return exit_code
     except ValueError as e:
