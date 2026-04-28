@@ -13,12 +13,11 @@
 use std::collections::HashMap;
 use std::path::Path;
 
-use class_diagram::ClassResolverError;
 use puml_parser::{
     BaseParseError, ClassError, IncludeExpandError, IncludeParseError, PreprocessError,
     ProcedureExpandError, ProcedureParseError,
 };
-use puml_resolver::ComponentResolverError;
+use puml_resolver::{ClassPumlResolverError, ComponentResolverError};
 
 #[derive(Debug)]
 pub struct ProjectedError {
@@ -186,6 +185,14 @@ impl ErrorView for ClassError {
     fn project(&self, base_dir: &Path) -> ProjectedError {
         match self {
             ClassError::Base(e) => e.project(base_dir),
+            ClassError::UnexpectedUsingAttribute => {
+                let _ = base_dir;
+                ProjectedError::new("UnexpectedUsingAttribute")
+            }
+            ClassError::UnexpectedClassMember(rule) => {
+                let _ = base_dir;
+                ProjectedError::new("UnexpectedClassMember").with_field("rule", rule.clone())
+            }
         }
     }
 }
@@ -211,39 +218,39 @@ impl ErrorView for ComponentResolverError {
     }
 }
 
-impl ErrorView for ClassResolverError {
+impl ErrorView for ClassPumlResolverError {
     fn project(&self, _base_dir: &Path) -> ProjectedError {
         match self {
-            ClassResolverError::UnresolvedReference { reference } => {
+            ClassPumlResolverError::UnresolvedReference { reference } => {
                 ProjectedError::new("UnresolvedReference")
                     .with_field("reference", reference.clone())
             }
 
-            ClassResolverError::DuplicateEntity { entity_id } => {
+            ClassPumlResolverError::DuplicateEntity { entity_id } => {
                 ProjectedError::new("DuplicateEntity").with_field("entity_id", entity_id.clone())
             }
 
-            ClassResolverError::UnknownEntityType { entity_type } => {
+            ClassPumlResolverError::UnknownEntityType { entity_type } => {
                 ProjectedError::new("UnknownEntityType")
                     .with_field("entity_type", entity_type.clone())
             }
 
-            ClassResolverError::InvalidRelationship { from, to, reason } => {
+            ClassPumlResolverError::InvalidRelationship { from, to, reason } => {
                 ProjectedError::new("InvalidRelationship")
                     .with_field("from", from.clone())
                     .with_field("to", to.clone())
                     .with_field("reason", reason.clone())
             }
 
-            ClassResolverError::CircularInheritance { cycle } => {
+            ClassPumlResolverError::CircularInheritance { cycle } => {
                 ProjectedError::new("CircularInheritance").with_field("cycle", cycle.clone())
             }
 
-            ClassResolverError::InvalidVisibility { modifier } => {
+            ClassPumlResolverError::InvalidVisibility { modifier } => {
                 ProjectedError::new("InvalidVisibility").with_field("modifier", modifier.clone())
             }
 
-            ClassResolverError::ParseError { message } => {
+            ClassPumlResolverError::ParseError { message } => {
                 ProjectedError::new("ParseError").with_field("message", message.clone())
             }
         }
