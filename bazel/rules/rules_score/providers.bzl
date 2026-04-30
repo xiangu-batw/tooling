@@ -213,3 +213,17 @@ SphinxNeedsInfo = provider(
         "needs_json_files": "Depset of needs.json files including transitive dependencies",
     },
 )
+FilteredExecpathInfo = provider(
+    doc = """Provider for resolved filtered execpath targets.
+    Produced by the filter_execpath rule, this provider carries a resolved
+    Sphinx argument (flag=path) computed at analysis time from a target's output
+    files. Currently used to pass the location of Doxygen XML output to Breathe via a Sphinx
+    option.
+    """,
+    fields = {
+        "flag": "String – the Sphinx -D flag prefix (e.g. '-Dbreathe_projects.com').",
+        "resolved_path": "String – the resolved path suffix (after /bin/) to the matched output.",
+        "arg": "String – the fully formed argument: flag=resolved_path.",
+        "matched_file": "File – the matched output file from the target.",
+    },
+)

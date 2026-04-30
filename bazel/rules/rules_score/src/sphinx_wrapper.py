@@ -260,15 +260,12 @@ def main() -> int:
     try:
         args, extra_args = parse_arguments()
         validate_arguments(args)
-        logger.info(f"[DEBUG] extra_args from parse_known_args: {extra_args}")
-        logger.info(f"[DEBUG] sys.argv was: {sys.argv}")
         # Create processor instance
         stdout_processor = StdoutProcessor()
         stderr_processor = StderrProcessor()
         # Redirect stdout and stderr
         with redirect_stderr(stderr_processor), redirect_stdout(stdout_processor):
             sphinx_args = build_sphinx_arguments(args, extra_args)
-            logger.info(f"[DEBUG] Final sphinx_args: {sphinx_args}")
             exit_code = run_sphinx_build(sphinx_args, args.builder)
         return exit_code
     except ValueError as e:

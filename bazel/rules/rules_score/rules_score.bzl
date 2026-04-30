@@ -10,10 +10,10 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 # *******************************************************************************
-
 load(
     "//bazel/rules/rules_score:providers.bzl",
     _ComponentInfo = "ComponentInfo",
+    _FilteredExecpathInfo = "FilteredExecpathInfo",
     _SphinxSourcesInfo = "SphinxSourcesInfo",
     _UnitInfo = "UnitInfo",
 )
@@ -38,6 +38,10 @@ load(
     _dependable_element = "dependable_element",
 )
 load(
+    "//bazel/rules/rules_score/private:filter_execpath.bzl",
+    _filter_execpath = "filter_execpath",
+)
+load(
     "//bazel/rules/rules_score/private:fmea.bzl",
     _fmea = "fmea",
 )
@@ -49,7 +53,6 @@ load(
 )
 load(
     "//bazel/rules/rules_score/private:sphinx_module.bzl",
-    _filter_execpath = "filter_execpath",
     _sphinx_module = "sphinx_module",
 )
 load(
@@ -67,13 +70,14 @@ assumed_system_requirements = _assumed_system_requirements
 component_requirements = _component_requirements
 dependability_analysis = _dependability_analysis
 feature_requirements = _feature_requirements
-fmea = _fmea
 filter_execpath = _filter_execpath
+fmea = _fmea
 sphinx_module = _sphinx_module
 unit = _unit
 unit_design = _unit_design
 component = _component
 dependable_element = _dependable_element
+FilteredExecpathInfo = _FilteredExecpathInfo
 SphinxSourcesInfo = _SphinxSourcesInfo
 UnitInfo = _UnitInfo
 ComponentInfo = _ComponentInfo
