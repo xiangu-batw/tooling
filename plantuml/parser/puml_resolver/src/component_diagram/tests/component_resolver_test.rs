@@ -16,7 +16,7 @@ use std::path::PathBuf;
 use std::rc::Rc;
 
 use component_parser::PumlComponentParser;
-use component_resolver::{ComponentResolver, ComponentResolverError, LogicComponent};
+use component_resolver::{ElementResolver, ElementResolverError, LogicElement};
 use parser_core::DiagramParser;
 use puml_utils::LogLevel;
 use resolver_traits::DiagramResolver;
@@ -25,16 +25,16 @@ use test_framework::{run_case, DefaultExpectationChecker, DiagramProcessor};
 // ===== Component Resolver adapter DiagramProcessor =====
 struct ComponentResolverRunner;
 impl DiagramProcessor for ComponentResolverRunner {
-    type Output = HashMap<String, LogicComponent>;
-    type Error = ComponentResolverError;
+    type Output = HashMap<String, LogicElement>;
+    type Error = ElementResolverError;
 
     fn run(
         &self,
         files: &HashSet<Rc<PathBuf>>,
-    ) -> Result<HashMap<Rc<PathBuf>, HashMap<String, LogicComponent>>, ComponentResolverError> {
+    ) -> Result<HashMap<Rc<PathBuf>, HashMap<String, LogicElement>>, ElementResolverError> {
         let mut results = HashMap::new();
         let mut parser = PumlComponentParser;
-        let mut resolver = ComponentResolver::new();
+        let mut resolver = ElementResolver::new();
 
         for path in files {
             let puml_file = fs::read_to_string(&**path).expect("Failed to read test file");
@@ -53,6 +53,15 @@ impl DiagramProcessor for ComponentResolverRunner {
 fn run_component_resolver_case(case_name: &str) {
     run_case(
         "integration_test/component_diagram",
+        case_name,
+        ComponentResolverRunner,
+        DefaultExpectationChecker,
+    );
+}
+
+fn run_deployment_resolver_case(case_name: &str) {
+    run_case(
+        "integration_test/deployment_diagram",
         case_name,
         ComponentResolverRunner,
         DefaultExpectationChecker,
@@ -142,4 +151,24 @@ fn test_top_level_port() {
 #[test]
 fn test_port_deep_nesting() {
     run_component_resolver_case("port_deep_nesting");
+}
+
+#[test]
+fn test_deployment_diagram() {
+    run_deployment_resolver_case("deployment_diagram_it");
+}
+
+#[test]
+fn test_declare_elements() {
+    run_deployment_resolver_case("declare_elements");
+}
+
+#[test]
+fn test_arrows_link() {
+    run_deployment_resolver_case("arrows_link");
+}
+
+#[test]
+fn test_nested_elements() {
+    run_deployment_resolver_case("nested_elements");
 }
